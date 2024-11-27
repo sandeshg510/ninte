@@ -1,0 +1,46 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)"/>
+  
+  <!-- Logo Group -->
+  <g filter="url(#glow)">
+    <!-- "ninte" text -->
+    <g transform="translate(128, 256)">
+      <!-- Letters with consistent 8px stroke width -->
+      <path d="M0 -48v96M0 -48c0 0 32 0 32 48v48" 
+            stroke="white" stroke-width="8" stroke-linecap="round"/>
+      <path d="M64 48v-96M64 -24h8" 
+            stroke="white" stroke-width="8" stroke-linecap="round"/>
+      <path d="M96 -48v96M96 -48c0 0 32 0 32 48v48" 
+            stroke="white" stroke-width="8" stroke-linecap="round"/>
+      <path d="M160 -64v112M144 -16h32" 
+            stroke="white" stroke-width="8" stroke-linecap="round"/>
+      <path d="M208 0a32 32 0 1 0 0 64h-16v-64h16" 
+            stroke="white" stroke-width="8" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Underline Animation -->
+    <path d="M128 320h40" 
+          stroke="white" stroke-width="4" stroke-linecap="round">
+      <animate attributeName="d" 
+               dur="0.6s" 
+               repeatCount="1"
+               values="M128 320h0; M128 320h40"
+               fill="freeze"/>
+    </path>
+  </g>
+
+  <defs>
+    <!-- Clean Gradient -->
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#6B8AFE"/>
+      <stop offset="100%" stop-color="#8BA4FF"/>
+    </linearGradient>
+    
+    <!-- Subtle Glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1"/>
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+</svg> 

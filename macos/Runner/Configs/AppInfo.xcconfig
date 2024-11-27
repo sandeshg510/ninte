@@ -8,7 +8,7 @@
 PRODUCT_NAME = ninte
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.ninte.ninte
+PRODUCT_BUNDLE_IDENTIFIER = com.xdaguy.ninte
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2024 com.ninte. All rights reserved.

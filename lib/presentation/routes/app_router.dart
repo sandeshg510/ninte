@@ -1,31 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:ninte/presentation/pages/onboarding/onboarding_page.dart';
 import 'package:ninte/presentation/pages/auth/auth_page.dart';
 import 'package:ninte/presentation/pages/home/home_page.dart';
-import 'package:ninte/presentation/routes/page_transitions.dart';
+import 'package:ninte/presentation/pages/profile/profile_page.dart';
 
 class AppRouter {
-  static const String onboarding = '/';
   static const String auth = '/auth';
   static const String home = '/home';
+  static const String profile = '/profile';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case onboarding:
-        return ThemeTransitionPage(
-          page: const OnboardingPage(),
-        );
       case auth:
-        return ThemeTransitionPage(
-          page: const AuthPage(),
+        return MaterialPageRoute(
+          builder: (_) => const AuthPage(),
+          settings: settings,
         );
+        
       case home:
-        return ThemeTransitionPage(
-          page: const HomePage(),
+        return MaterialPageRoute(
+          builder: (_) => const HomePage(),
+          settings: settings,
         );
+        
+      case profile:
+        return MaterialPageRoute(
+          builder: (_) => const ProfilePage(),
+          settings: settings,
+        );
+
       default:
-        return ThemeTransitionPage(
-          page: const OnboardingPage(),
+        return MaterialPageRoute(
+          builder: (_) => const AuthPage(),
+          settings: settings,
         );
     }
   }

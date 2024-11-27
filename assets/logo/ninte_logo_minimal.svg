@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clean Background -->
+  <circle cx="256" cy="256" r="240" fill="url(#minimalGradient)"/>
+  
+  <!-- Simplified N -->
+  <g filter="url(#softShadow)">
+    <path d="M160 352V160h48l96 128V160h48v192h-48l-96-128v128h-48z" 
+          fill="white" opacity="0.95"/>
+    
+    <!-- Minimal Growth Lines -->
+    <path d="M256 80v40M216 100l40-20l40 20" 
+          stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.8"/>
+  </g>
+
+  <defs>
+    <linearGradient id="minimalGradient" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#6B8AFE"/>
+      <stop offset="100%" stop-color="#8BA4FF"/>
+    </linearGradient>
+    <filter id="softShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+</svg> 

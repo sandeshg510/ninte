@@ -1,0 +1,35 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="96" cy="96" r="88" fill="url(#bgGradient)"/>
+  
+  <!-- Single 'n' with underline -->
+  <g filter="url(#glow)" transform="translate(64, 96)">
+    <!-- Letter 'n' -->
+    <path d="M0 -24v48M0 -24c0 0 16 0 16 24v24" 
+          stroke="white" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Underline -->
+    <path d="M0 36h20" 
+          stroke="white" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="d" 
+               dur="0.6s" 
+               repeatCount="1"
+               values="M0 36h0; M0 36h20"
+               fill="freeze"/>
+    </path>
+  </g>
+
+  <defs>
+    <!-- Clean Gradient -->
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="192" y2="192">
+      <stop offset="0%" stop-color="#6B8AFE"/>
+      <stop offset="100%" stop-color="#8BA4FF"/>
+    </linearGradient>
+    
+    <!-- Subtle Glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="0.5"/>
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+</svg> 

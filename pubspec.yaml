@@ -1,7 +1,7 @@
 name: ninte
-description: An end-to-end encrypted habit-building and productivity app.
+description: A modern habit tracking app built with Flutter.
 publish_to: 'none'
-version: 1.0.0+1
+version: 0.1.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -10,38 +10,35 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  # State Management
+  flutter_riverpod: ^2.4.9
   flutter_bloc: ^8.1.3
-  # Local Storage
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-  # Encryption
-  encrypt: ^5.0.3
-  # Dependency Injection
-  get_it: ^7.6.7
-  # Functional Programming
-  dartz: ^0.10.1
-  # API Client
-  dio: ^5.4.0
-  # UI and Styling
-  google_fonts: ^6.1.0
-  flutter_svg: ^2.0.9
-  shimmer: ^3.0.0
-  # Others
-  equatable: ^2.0.5
-  intl: ^0.19.0
-  uuid: ^4.3.3
   shared_preferences: ^2.2.2
+  equatable: ^2.0.5
+  shimmer: ^3.0.0
+  intl: ^0.19.0
+  path_provider: ^2.1.1
+  sqflite: ^2.3.0
+  uuid: ^4.2.2
+  
+  # Firebase
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  cloud_firestore: ^4.13.6
+  firebase_storage: ^11.5.6
+  flutter_svg: ^2.0.9
+  google_sign_in: ^6.1.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
-  build_runner: ^2.4.8
-  hive_generator: ^2.0.1
+  build_runner: ^2.4.7
+  mockito: ^5.4.4
+  test: ^1.24.9
 
 flutter:
   uses-material-design: true
-  
+
   assets:
-    - assets/images/ 
+    - assets/images/
+    - assets/icons/

@@ -6,7 +6,7 @@ class CustomTextField extends StatelessWidget {
   final String label;
   final bool obscureText;
   final TextInputType? keyboardType;
-  final Widget? suffixIcon;
+  final Widget? prefixIcon;
   final String? Function(String?)? validator;
 
   const CustomTextField({
@@ -15,7 +15,7 @@ class CustomTextField extends StatelessWidget {
     required this.label,
     this.obscureText = false,
     this.keyboardType,
-    this.suffixIcon,
+    this.prefixIcon,
     this.validator,
   });
 
@@ -70,12 +70,12 @@ class CustomTextField extends StatelessWidget {
               width: 2,
             ),
           ),
-          suffixIcon: suffixIcon != null
+          prefixIcon: prefixIcon != null
               ? IconTheme(
                   data: IconThemeData(
                     color: theme.textSecondary,
                   ),
-                  child: suffixIcon!,
+                  child: prefixIcon!,
                 )
               : null,
           filled: true,

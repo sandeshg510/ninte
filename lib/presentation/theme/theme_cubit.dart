@@ -1,21 +1,28 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ninte/presentation/theme/app_theme.dart';
-import 'package:ninte/presentation/theme/app_colors.dart';
 import 'package:ninte/presentation/theme/app_theme_data.dart';
+import 'package:ninte/presentation/theme/app_colors.dart';
 
+/// Represents the current state of theme system
 class ThemeState {
+  /// Current theme type from available themes
   final ThemeType type;
+  
+  /// Current theme data containing colors and styles
   final AppThemeData theme;
+  
+  /// Whether theme is currently transitioning
+  /// Used for animations and transitions
   final bool isChanging;
 
-  ThemeState({
+  const ThemeState({
     required this.type,
     required this.theme,
     this.isChanging = false,
   });
 
+  /// Creates a copy of the current state with optional parameter overrides
   ThemeState copyWith({
     ThemeType? type,
     AppThemeData? theme,
@@ -29,69 +36,73 @@ class ThemeState {
   }
 }
 
+/// Manages theme state and provides theme-related functionality
 class ThemeCubit extends Cubit<ThemeState> {
-  static const String _themeKey = 'selected_theme';
-  final SharedPreferences _prefs;
+  /// SharedPreferences instance for persisting theme selection
+  final SharedPreferences prefs;
+  
+  /// Key used to store theme preference
+  static const String _themeKey = 'app_theme';
 
-  ThemeCubit(this._prefs) : super(ThemeState(
-    type: ThemeType.eclipse,
-    theme: AppTheme.defaultTheme,
-  )) {
-    final themeIndex = _prefs.getInt(_themeKey);
-    if (themeIndex != null) {
-      final type = ThemeType.values[themeIndex];
-      final theme = AppTheme.themes[type]!;
-      _updateTheme(type, theme);
-    }
-  }
+  /// Creates a ThemeCubit with initial theme from preferences
+  /// Falls back to darkMinimal if no theme is saved
+  ThemeCubit(this.prefs) : super(
+    ThemeState(
+      type: ThemeType.values.byName(
+        prefs.getString(_themeKey) ?? ThemeType.darkMinimal.name,
+      ),
+      theme: AppTheme.themes[ThemeType.darkMinimal]!,
+    ),
+  );
 
+  /// Changes the current theme with animation
+  /// Persists the selection to SharedPreferences
   void changeTheme(ThemeType type) {
-    if (type == state.type) return;
-    
-    // Start theme change
-    emit(state.copyWith(isChanging: true));
-    
-    final theme = AppTheme.themes[type]!;
-    _prefs.setInt(_themeKey, type.index);
+    if (!AppTheme.themes.containsKey(type)) return;
 
-    // Update colors first
-    AppColors.setCurrentTheme(theme);
-    
-    // Update system UI
-    AppTheme.setSystemUIOverlayStyle(theme);
-    
-    // Complete theme change
-    emit(ThemeState(
+    emit(state.copyWith(
       type: type,
-      theme: theme,
-      isChanging: false,
+      theme: AppTheme.themes[type]!,
+      isChanging: true,
     ));
-
-    // Force a rebuild after a frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      emit(ThemeState(
-        type: type,
-        theme: theme,
-        isChanging: false,
-      ));
+    
+    prefs.setString(_themeKey, type.name);
+    
+    Future.delayed(const Duration(milliseconds: 300), () {
+      emit(state.copyWith(isChanging: false));
     });
   }
 
-  void _updateTheme(ThemeType type, AppThemeData theme) {
-    // Start theme change
-    emit(state.copyWith(isChanging: true));
+  /// Toggles between light and dark mode while preserving theme style
+  /// Example: Dark Ocean -> Light Ocean
+  void toggleThemeMode() {
+    final currentTheme = state.type;
+    final isDark = AppTheme.themes[currentTheme]!.tags.contains(ThemeTag.dark);
     
-    // Update colors first
-    AppColors.setCurrentTheme(theme);
+    // Find corresponding theme in opposite mode
+    final newTheme = AppTheme.themes.entries.firstWhere(
+      (entry) => 
+        entry.value.tags.contains(isDark ? ThemeTag.light : ThemeTag.dark) &&
+        entry.value.tags.any((tag) => 
+          AppTheme.themes[currentTheme]!.tags.contains(tag) &&
+          tag != ThemeTag.dark &&
+          tag != ThemeTag.light
+        ),
+      orElse: () => MapEntry(
+        isDark ? ThemeType.lightMinimal : ThemeType.darkMinimal,
+        AppTheme.themes[isDark ? ThemeType.lightMinimal : ThemeType.darkMinimal]!
+      ),
+    );
     
-    // Update system UI
-    AppTheme.setSystemUIOverlayStyle(theme);
-    
-    // Complete theme change
-    emit(ThemeState(
-      type: type,
-      theme: theme,
-      isChanging: false,
-    ));
+    changeTheme(newTheme.key);
+  }
+
+  /// Returns list of available themes for specified mode
+  /// Used for theme selection UI
+  List<ThemeType> getThemesForMode(bool isDark) {
+    return AppTheme.themes.entries
+      .where((entry) => entry.value.tags.contains(isDark ? ThemeTag.dark : ThemeTag.light))
+      .map((e) => e.key)
+      .toList();
   }
 } 

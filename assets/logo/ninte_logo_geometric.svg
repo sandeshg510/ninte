@@ -1,0 +1,44 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Geometric Background -->
+  <circle cx="256" cy="256" r="240" fill="url(#geoGradient)"/>
+  
+  <!-- Pattern Elements -->
+  <g opacity="0.1" stroke="white" stroke-width="1">
+    <path d="M128 128L384 384M128 384L384 128"/>
+    <rect x="176" y="176" width="160" height="160" rx="16"/>
+    <circle cx="256" cy="256" r="113"/>
+  </g>
+  
+  <!-- Geometric N -->
+  <g filter="url(#geoShadow)">
+    <!-- Base N -->
+    <path d="M160 352V160h48l96 128V160h48v192h-48l-96-128v128h-48z" 
+          fill="white" opacity="0.95"/>
+    
+    <!-- Geometric Elements -->
+    <g opacity="0.9">
+      <!-- Triangular Growth -->
+      <path d="M256 80L176 160h160L256 80z" fill="white" opacity="0.6"/>
+      
+      <!-- Connection Points -->
+      <rect x="212" cy="116" width="8" height="8" fill="white"/>
+      <rect x="252" cy="96" width="8" height="8" fill="white"/>
+      <rect x="292" cy="116" width="8" height="8" fill="white"/>
+      
+      <!-- Geometric Lines -->
+      <path d="M216 120h80M256 100v20" 
+            stroke="white" stroke-width="2" stroke-linecap="square"/>
+    </g>
+  </g>
+
+  <defs>
+    <linearGradient id="geoGradient" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#6B8AFE"/>
+      <stop offset="50%" stop-color="#7B97FE"/>
+      <stop offset="100%" stop-color="#8BA4FF"/>
+    </linearGradient>
+    <filter id="geoShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+</svg> 

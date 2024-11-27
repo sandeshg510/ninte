@@ -1,0 +1,43 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Natural Background -->
+  <circle cx="256" cy="256" r="240" fill="url(#organicGradient)"/>
+  <path d="M256 36c-40 0-80 10-120 30s-60 40-80 70c20-40 60-70 120-90s120-20 180 0 100 50 120 90c-20-30-40-50-80-70s-80-30-120-30z"
+        fill="white" opacity="0.1"/>
+  
+  <!-- Organic N -->
+  <g filter="url(#naturalShadow)">
+    <!-- Base N -->
+    <path d="M160 352V160h48l96 128V160h48v192h-48l-96-128v128h-48z" 
+          fill="white" opacity="0.95"/>
+    
+    <!-- Organic Growth -->
+    <g opacity="0.9">
+      <!-- Leaf Patterns -->
+      <path d="M256 120c-32-16-64-16-96 0 16-32 48-48 96-48s80 16 96 48c-32-16-64-16-96 0z"
+            fill="white"/>
+      <path d="M216 100c-16-8-32-8-48 0 8-16 24-24 48-24s40 8 48 24c-16-8-32-8-48 0z"
+            fill="white" opacity="0.6"/>
+      <path d="M296 100c16-8 32-8 48 0-8-16-24-24-48-24s-40 8-48 24c16-8 32-8 48 0z"
+            fill="white" opacity="0.6"/>
+      
+      <!-- Growth Lines -->
+      <path d="M196 140c20-10 40-10 60 0M256 80v40" 
+            stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <path d="M176 160c40-20 80-20 120 0" 
+            stroke="white" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 6"/>
+    </g>
+  </g>
+
+  <defs>
+    <linearGradient id="organicGradient" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#6B8AFE"/>
+      <stop offset="33%" stop-color="#7B97FE"/>
+      <stop offset="66%" stop-color="#8BA4FF"/>
+      <stop offset="100%" stop-color="#9BB1FF"/>
+    </linearGradient>
+    <filter id="naturalShadow">
+      <feGaussianBlur stdDeviation="2"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+</svg> 

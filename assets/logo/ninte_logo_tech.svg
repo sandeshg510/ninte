@@ -1,0 +1,53 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Layered Background -->
+  <circle cx="256" cy="256" r="240" fill="url(#techGradient)"/>
+  <circle cx="256" cy="256" r="220" fill="url(#circuitGlow)" opacity="0.1"/>
+  
+  <!-- Circuit Pattern -->
+  <g opacity="0.15" stroke="white" stroke-width="2">
+    <path d="M40 256h80M392 256h80M256 40v80M256 392v80" stroke-dasharray="4 4"/>
+    <circle cx="256" cy="256" r="180" stroke-dasharray="8 8"/>
+    <circle cx="256" cy="256" r="140" stroke-dasharray="6 6"/>
+  </g>
+  
+  <!-- Tech N -->
+  <g filter="url(#techShadow)">
+    <!-- Base N -->
+    <path d="M160 352V160h48l96 128V160h48v192h-48l-96-128v128h-48z" 
+          fill="white" opacity="0.95"/>
+    
+    <!-- Tech Elements -->
+    <g opacity="0.9">
+      <!-- Data Flow -->
+      <path d="M256 80c-40 0-80 20-100 60 20-20 60-40 100-40s80 20 100 40c-20-40-60-60-100-60z"
+            fill="white"/>
+      
+      <!-- Connection Points -->
+      <circle cx="216" cy="120" r="8" fill="white"/>
+      <circle cx="256" cy="100" r="8" fill="white"/>
+      <circle cx="296" cy="120" r="8" fill="white"/>
+      
+      <!-- Circuit Lines -->
+      <path d="M216 120h80M256 100v20" 
+            stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <path d="M176 140c40-20 80-20 120 0" 
+            stroke="white" stroke-width="2" stroke-dasharray="4 4"/>
+    </g>
+  </g>
+
+  <defs>
+    <linearGradient id="techGradient" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#6B8AFE"/>
+      <stop offset="50%" stop-color="#7B97FE"/>
+      <stop offset="100%" stop-color="#8BA4FF"/>
+    </linearGradient>
+    <radialGradient id="circuitGlow" cx="256" cy="256" r="220">
+      <stop offset="0%" stop-color="white" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="techShadow">
+      <feGaussianBlur stdDeviation="4"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+</svg> 
