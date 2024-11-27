@@ -1,0 +1,46 @@
+Launching lib/main.dart on A063 in debug mode...
+Running Gradle task 'assembleDebug'...
+lib/core/app.dart:7:8: Error: Error when reading 'lib/presentation/theme/theme_provider.dart': No such file or directory
+import 'package:ninte/presentation/theme/theme_provider.dart';
+       ^
+lib/core/app.dart:19:16: Error: The method 'AppThemeProvider' isn't defined for the class 'NinteApp'.
+ - 'NinteApp' is from 'package:ninte/core/app.dart' ('lib/core/app.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'AppThemeProvider'.
+        return AppThemeProvider(
+               ^^^^^^^^^^^^^^^^
+lib/core/app.dart:23:29: Error: The getter 'AppThemeProvider' isn't defined for the class 'NinteApp'.
+ - 'NinteApp' is from 'package:ninte/core/app.dart' ('lib/core/app.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppThemeProvider'.
+              final theme = AppThemeProvider.of(context);
+                            ^^^^^^^^^^^^^^^^
+lib/presentation/pages/home/home_page.dart:93:5: Error: Expected an identifier, but got ')'.
+Try inserting an identifier before ')'.
+    );
+    ^
+lib/presentation/pages/home/home_page.dart:99:5: Error: Expected an identifier, but got ')'.
+Try inserting an identifier before ')'.
+    );
+    ^
+lib/presentation/pages/settings/theme_settings_page.dart:68:5: Error: Type 'AppThemeData' not found.
+    AppThemeData themeData,
+    ^^^^^^^^^^^^
+lib/presentation/pages/settings/theme_settings_page.dart:68:5: Error: 'AppThemeData' isn't a type.
+    AppThemeData themeData,
+    ^^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command '/Users/zapbose/development/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s
+Error: Gradle task assembleDebug failed with exit code 1
