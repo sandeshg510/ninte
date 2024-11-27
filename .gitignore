@@ -106,6 +106,7 @@ lcov.info
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
 *.jks
+android/gradle.properties
 
 # iOS specific
 **/ios/**/*.mode1v3
@@ -144,3 +145,4 @@ lcov.info
 # Windows specific
 **/windows/flutter/generated_plugin_registrant.cc
 **/windows/flutter/generated_plugin_registrant.h
+
