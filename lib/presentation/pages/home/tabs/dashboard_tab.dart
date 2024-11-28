@@ -13,6 +13,9 @@ import 'package:ninte/presentation/widgets/achievement_card.dart';
 import 'package:ninte/presentation/widgets/progress_chart.dart';
 import 'package:ninte/presentation/widgets/habit_progress_card.dart';
 import 'package:ninte/presentation/widgets/gradient_container.dart';
+import 'package:ninte/features/pomodoro/providers/pomodoro_provider.dart';
+import 'package:ninte/features/pomodoro/models/pomodoro_timer.dart';
+import 'package:ninte/presentation/pages/pomodoro/pomodoro_page.dart';
 
 class DashboardTab extends ConsumerStatefulWidget {
   const DashboardTab({super.key});
@@ -985,5 +988,119 @@ class _DashboardTabState extends ConsumerState<DashboardTab> with SingleTickerPr
         ),
       ),
     );
+  }
+
+  Widget _buildPomodoroCard() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final pomodoroState = ref.watch(pomodoroProvider);
+        
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PomodoroPage(),
+              ),
+            );
+          },
+          child: AppColors.withTheme(
+            builder: (context, theme) => GradientContainer(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      theme.accent.withOpacity(0.15),
+                      theme.accentLight.withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: theme.surfaceLight.withOpacity(0.1),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Pomodoro Timer',
+                          style: TextStyle(
+                            color: theme.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${pomodoroState.completedSessions} Sessions',
+                          style: TextStyle(
+                            color: theme.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Center(
+                      child: Text(
+                        _formatTime(pomodoroState.remainingSeconds),
+                        style: TextStyle(
+                          color: theme.textPrimary,
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: () => ref.read(pomodoroProvider.notifier).resetTimer(),
+                          icon: Icon(Icons.refresh_rounded, color: theme.textSecondary),
+                        ),
+                        const SizedBox(width: 16),
+                        IconButton(
+                          onPressed: pomodoroState.status == TimerStatus.running
+                              ? () => ref.read(pomodoroProvider.notifier).pauseTimer()
+                              : () => ref.read(pomodoroProvider.notifier).startTimer(),
+                          icon: Icon(
+                            pomodoroState.status == TimerStatus.running
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                            color: theme.accent,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        IconButton(
+                          onPressed: () {
+                            // TODO: Show settings
+                          },
+                          icon: Icon(Icons.settings_rounded, color: theme.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatTime(int seconds) {
+    final minutes = (seconds / 60).floor();
+    final remainingSeconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 } 

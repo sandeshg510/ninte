@@ -11,6 +11,7 @@ import 'package:ninte/presentation/widgets/animated_nav_bar.dart';
 import 'package:ninte/presentation/pages/settings/settings_page.dart';
 import 'package:ninte/presentation/pages/settings/theme_settings_page.dart';
 import 'package:ninte/features/support/pages/personal_support_page.dart';
+import 'package:ninte/presentation/pages/pomodoro/pomodoro_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -107,6 +108,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     );
                   },
                 ),
+                _buildDrawerItem(
+                  icon: Icons.timer_rounded,
+                  title: 'Pomodoro Timer',
+                  subtitle: 'Focus & productivity',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PomodoroPage(),
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 16),
                 _buildAchievementsSection(),
                 ListTile(
@@ -117,11 +131,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => const PersonalSupportPage(),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PersonalSupportPage(),
+                      ),
                     );
                   },
                 ),

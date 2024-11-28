@@ -20,7 +20,6 @@ Core functionality and application-wide services.
 - `/providers`
   - `auth_provider.dart` - Authentication state management using Riverpod
   - `shared_preferences_provider.dart` - Local storage provider
-  - `tap_counter_provider.dart` - State management for tap detection features
 
 - `/services`
   - `auth_service.dart` - Firebase authentication implementation
