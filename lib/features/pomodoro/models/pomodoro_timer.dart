@@ -14,6 +14,8 @@ enum TimerType {
 }
 
 class PomodoroTimer {
+  static const maxLongBreakDuration = 45;
+
   final int workDuration;
   final int shortBreakDuration;
   final int longBreakDuration;
@@ -32,7 +34,8 @@ class PomodoroTimer {
     this.vibrationEnabled = true,
     this.autoStartBreaks = false,
     this.autoStartPomodoros = false,
-  });
+  }) : assert(longBreakDuration <= maxLongBreakDuration, 
+             'Long break duration cannot exceed $maxLongBreakDuration minutes');
 
   PomodoroTimer copyWith({
     int? workDuration,

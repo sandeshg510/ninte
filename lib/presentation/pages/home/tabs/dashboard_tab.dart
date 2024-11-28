@@ -1038,7 +1038,7 @@ class _DashboardTabState extends ConsumerState<DashboardTab> with SingleTickerPr
                           ),
                         ),
                         Text(
-                          '${pomodoroState.completedSessions} Sessions',
+                          '${pomodoroState.totalSessions} Sessions',
                           style: TextStyle(
                             color: theme.textSecondary,
                             fontSize: 14,

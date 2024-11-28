@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/services.dart';
 import 'dart:developer' as dev;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -255,13 +256,29 @@ class AuthService {
 
   // Helper method to update user data in Firestore
   Future<void> _updateUserData(String uid, Map<String, dynamic> data) async {
-    // TODO: Implement Firestore update
+    try {
+      await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .set(data, SetOptions(merge: true));
+    } catch (e) {
+      dev.log('Error updating user data: $e');
+      throw 'Failed to update user data';
+    }
   }
 
   // Helper method to get user data from Firestore
   Future<Map<String, dynamic>?> _getUserData(String uid) async {
-    // TODO: Implement Firestore get
-    return null;
+    try {
+      final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+      return doc.data();
+    } catch (e) {
+      dev.log('Error getting user data: $e');
+      return null;
+    }
   }
 
   // Check persisted auth state

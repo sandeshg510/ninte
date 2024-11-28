@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:math' show min;
 import 'package:ninte/presentation/theme/app_colors.dart';
 import 'package:ninte/presentation/theme/app_theme_data.dart';
 import 'package:ninte/features/pomodoro/providers/pomodoro_provider.dart';
@@ -12,6 +13,7 @@ import 'package:ninte/features/pomodoro/widgets/timer_controls.dart';
 import 'package:ninte/features/pomodoro/widgets/session_stats.dart';
 import 'package:ninte/features/pomodoro/widgets/timer_type_dialog.dart';
 import 'background_pattern_painter.dart';
+import 'package:ninte/features/pomodoro/widgets/stats_shimmer.dart';
 
 class PomodoroPage extends ConsumerStatefulWidget {
   const PomodoroPage({super.key});
@@ -43,6 +45,7 @@ class _PomodoroPageState extends ConsumerState<PomodoroPage> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     final pomodoroState = ref.watch(pomodoroProvider);
+    final size = MediaQuery.of(context).size;
     
     return AppColors.withTheme(
       builder: (context, theme) => Scaffold(
@@ -56,66 +59,107 @@ class _PomodoroPageState extends ConsumerState<PomodoroPage> with SingleTickerPr
           ),
           actions: [
             IconButton(
+              icon: Icon(Icons.sync, color: theme.textPrimary),
+              onPressed: () => ref.read(pomodoroProvider.notifier).syncWithFirebase(),
+            ),
+            IconButton(
               icon: Icon(Icons.settings, color: theme.textPrimary),
               onPressed: () => _showSettingsDialog(context),
             ),
           ],
         ),
-        body: SafeArea(
+        body: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 24),
-              // Session Type Indicator using SessionChip
-              SessionChip(
-                type: pomodoroState.type,
-                duration: _getSessionDuration(pomodoroState),
-                isActive: pomodoroState.status == TimerStatus.running,
-                onTap: () => _showTimerTypeDialog(context),
-              ),
-              
-              // Timer Display with TimerRing
-              Expanded(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Background Pattern
-                    _buildBackgroundPattern(theme),
-                    
-                    // Timer Ring Widget
-                    TimerRing(
-                      progress: _getProgress(pomodoroState),
-                      previousProgress: _previousProgress,
-                      onProgressUpdate: (value) => _previousProgress = value,
-                      status: pomodoroState.status,
-                      theme: theme,
-                    ),
-                    
-                    // Time Display
-                    _buildTimeDisplay(theme, pomodoroState),
-                  ],
+              const SizedBox(height: 16),
+              // Session Type Indicator
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: SessionChip(
+                  type: pomodoroState.type,
+                  duration: _getSessionDuration(pomodoroState),
+                  isActive: pomodoroState.status == TimerStatus.running,
+                  onTap: () => _showTimerTypeDialog(context),
                 ),
               ),
               
-              // Timer Controls Widget
-              TimerControls(
-                status: pomodoroState.status,
-                onStart: () => ref.read(pomodoroProvider.notifier).startTimer(),
-                onPause: () => ref.read(pomodoroProvider.notifier).pauseTimer(),
-                onReset: () => ref.read(pomodoroProvider.notifier).resetTimer(),
-                onSkip: () => ref.read(pomodoroProvider.notifier).skipSession(),
+              // Timer Display
+              Container(
+                height: size.width * 0.8, // Make it proportional to screen width
+                padding: const EdgeInsets.all(24),
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Timer Ring
+                      SizedBox(
+                        width: size.width * 0.7,
+                        height: size.width * 0.7,
+                        child: TimerRing(
+                          progress: _getProgress(pomodoroState),
+                          previousProgress: _previousProgress,
+                          onProgressUpdate: (value) => _previousProgress = value,
+                          status: pomodoroState.status,
+                          theme: theme,
+                        ),
+                      ),
+                      
+                      // Time Display
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _formatTime(pomodoroState.remainingSeconds),
+                            style: TextStyle(
+                              color: theme.textPrimary,
+                              fontSize: 64,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          if (pomodoroState.status == TimerStatus.running)
+                            Text(
+                              'FOCUS',
+                              style: TextStyle(
+                                color: theme.accent,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 4,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
               
-              const SizedBox(height: 24),
-              
-              // Session Stats Widget
-              SessionStats(
-                completedSessions: pomodoroState.completedSessions,
-                totalMinutes: pomodoroState.completedSessions * pomodoroState.settings.workDuration,
-                currentStreak: pomodoroState.currentStreak,
-                bestStreak: pomodoroState.bestStreak,
+              // Timer Controls
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: TimerControls(
+                  status: pomodoroState.status,
+                  onStart: () => ref.read(pomodoroProvider.notifier).startTimer(),
+                  onPause: () => ref.read(pomodoroProvider.notifier).pauseTimer(),
+                  onReset: () => ref.read(pomodoroProvider.notifier).resetTimer(),
+                  onSkip: () => ref.read(pomodoroProvider.notifier).skipSession(),
+                ),
               ),
               
-              const SizedBox(height: 32),
+              // Session Stats
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: pomodoroState.isLoading
+                    ? const StatsShimmer()
+                    : SessionStats(
+                        dailySessions: pomodoroState.dailySessions,
+                        dailyMinutes: pomodoroState.dailyMinutes,
+                        totalSessions: pomodoroState.totalSessions,
+                        totalMinutes: pomodoroState.totalMinutes,
+                        currentStreak: pomodoroState.currentStreak,
+                        bestStreak: pomodoroState.bestStreak,
+                      ),
+              ),
             ],
           ),
         ),
@@ -130,48 +174,6 @@ class _PomodoroPageState extends ConsumerState<PomodoroPage> with SingleTickerPr
         progress: _animationController.value,
       ),
       size: Size.infinite,
-    );
-  }
-
-  Widget _buildTimeDisplay(AppThemeData theme, PomodoroState state) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Time
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) => Transform.scale(
-            scale: value,
-            child: child,
-          ),
-          child: Text(
-            _formatTime(state.remainingSeconds),
-            style: TextStyle(
-              color: theme.textPrimary,
-              fontSize: 72,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 2,
-            ),
-          ),
-        ),
-        
-        // Status
-        AnimatedOpacity(
-          opacity: state.status == TimerStatus.running ? 1 : 0,
-          duration: const Duration(milliseconds: 200),
-          child: Text(
-            state.status == TimerStatus.running ? 'FOCUS' : '',
-            style: TextStyle(
-              color: theme.accent,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 4,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -208,6 +210,26 @@ class _PomodoroPageState extends ConsumerState<PomodoroPage> with SingleTickerPr
     showDialog(
       context: context,
       builder: (context) => const TimerTypeDialog(),
+    );
+  }
+
+  // Update TimerRing widget to handle proper sizing
+  Widget _buildTimerRing(AppThemeData theme, PomodoroState state) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = min(constraints.maxWidth, constraints.maxHeight);
+        return SizedBox(
+          width: size,
+          height: size,
+          child: TimerRing(
+            progress: _getProgress(state),
+            previousProgress: _previousProgress,
+            onProgressUpdate: (value) => _previousProgress = value,
+            status: state.status,
+            theme: theme,
+          ),
+        );
+      },
     );
   }
 } 

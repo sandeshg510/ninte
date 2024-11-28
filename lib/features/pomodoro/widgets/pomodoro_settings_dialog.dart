@@ -1,17 +1,217 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ninte/presentation/theme/app_colors.dart';
 import 'package:ninte/presentation/theme/app_theme_data.dart';
-import '../models/pomodoro_settings.dart';
+import '../models/pomodoro_timer.dart';
 import '../providers/pomodoro_provider.dart';
 
-class PomodoroSettingsDialog extends ConsumerWidget {
+class PomodoroSettingsDialog extends ConsumerStatefulWidget {
   const PomodoroSettingsDialog({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pomodoroState = ref.watch(pomodoroProvider);
-    final settings = pomodoroState.settings;
+  ConsumerState<PomodoroSettingsDialog> createState() => _PomodoroSettingsDialogState();
+}
+
+class _PomodoroSettingsDialogState extends ConsumerState<PomodoroSettingsDialog> {
+  // Local state to track slider values
+  late int _workDuration;
+  late int _shortBreakDuration;
+  late int _longBreakDuration;
+  Timer? _debounceTimer;
+
+  // Updated duration limits
+  static const _durationLimits = {
+    'work': {
+      'min': 15,    // Minimum 15 minutes
+      'max': 60,    // Maximum 60 minutes
+      'default': 25 // Default 25 minutes
+    },
+    'shortBreak': {
+      'min': 3,     // Minimum 3 minutes
+      'max': 30,    // Updated: Maximum 30 minutes (was 15)
+      'default': 5  // Default 5 minutes
+    },
+    'longBreak': {
+      'min': 15,    // Minimum 15 minutes
+      'max': 45,    // Updated: Maximum 45 minutes (was 60)
+      'default': 15 // Default 15 minutes
+    },
+  };
+
+  // Local state for behaviors
+  late bool _soundEnabled;
+  late bool _vibrationEnabled;
+  late bool _autoStartBreaks;
+  late bool _autoStartPomodoros;
+
+  @override
+  void initState() {
+    super.initState();
+    final settings = ref.read(pomodoroProvider).settings;
+    _workDuration = settings.workDuration;
+    _shortBreakDuration = settings.shortBreakDuration;
+    _longBreakDuration = settings.longBreakDuration;
+    _soundEnabled = settings.soundEnabled;
+    _vibrationEnabled = settings.vibrationEnabled;
+    _autoStartBreaks = settings.autoStartBreaks;
+    _autoStartPomodoros = settings.autoStartPomodoros;
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  // Debounced settings update
+  void _debouncedUpdateSettings(PomodoroTimer newSettings) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      ref.read(pomodoroProvider.notifier).updateSettings(newSettings);
+    });
+  }
+
+  Widget _buildDurationSetting(
+    AppThemeData theme, {
+    required IconData icon,
+    required String label,
+    required int value,
+    required int minValue,
+    required int maxValue,
+    required ValueChanged<int> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: theme.textSecondary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: theme.textPrimary,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    '$value min',
+                    style: TextStyle(
+                      color: theme.accent,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Text(
+              '$minValue',
+              style: TextStyle(
+                color: theme.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            Expanded(
+              child: SliderTheme(
+                data: SliderThemeData(
+                  activeTrackColor: theme.accent,
+                  inactiveTrackColor: theme.surfaceLight,
+                  thumbColor: theme.accent,
+                  overlayColor: theme.accent.withOpacity(0.2),
+                  trackHeight: 4,
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 8,
+                    elevation: 2,
+                  ),
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 16,
+                  ),
+                ),
+                child: Slider(
+                  value: value.toDouble(),
+                  min: minValue.toDouble(),
+                  max: maxValue.toDouble(),
+                  divisions: maxValue - minValue,
+                  onChanged: (newValue) {
+                    HapticFeedback.selectionClick();
+                    onChanged(newValue.round());
+                  },
+                ),
+              ),
+            ),
+            Text(
+              '$maxValue',
+              style: TextStyle(
+                color: theme.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _updateSettings(PomodoroTimer newSettings) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      ref.read(pomodoroProvider.notifier).updateSettings(newSettings);
+    });
+  }
+
+  Widget _buildBehaviorSetting(
+    AppThemeData theme, {
+    required IconData icon,
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: theme.textSecondary),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                color: theme.textPrimary,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+        Switch.adaptive(
+          value: value,
+          onChanged: (newValue) {
+            HapticFeedback.selectionClick();
+            onChanged(newValue);
+          },
+          activeColor: theme.accent,
+          activeTrackColor: theme.accent.withOpacity(0.3),
+          inactiveThumbColor: theme.textSecondary,
+          inactiveTrackColor: theme.surfaceLight.withOpacity(0.3),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = ref.watch(pomodoroProvider).settings;
 
     return AppColors.withTheme(
       builder: (context, theme) => Dialog(
@@ -53,13 +253,14 @@ class PomodoroSettingsDialog extends ConsumerWidget {
                 theme,
                 icon: Icons.work_rounded,
                 label: 'Work Duration',
-                value: settings.workDuration,
+                value: _workDuration,
+                minValue: _durationLimits['work']!['min']!,
+                maxValue: _durationLimits['work']!['max']!,
                 onChanged: (value) {
-                  if (value >= 1 && value <= 60) {
-                    ref.read(pomodoroProvider.notifier).updateSettings(
-                      settings.copyWith(workDuration: value),
-                    );
-                  }
+                  setState(() => _workDuration = value);
+                  _debouncedUpdateSettings(
+                    settings.copyWith(workDuration: value),
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -67,13 +268,14 @@ class PomodoroSettingsDialog extends ConsumerWidget {
                 theme,
                 icon: Icons.coffee_rounded,
                 label: 'Short Break',
-                value: settings.shortBreakDuration,
+                value: _shortBreakDuration,
+                minValue: _durationLimits['shortBreak']!['min']!,
+                maxValue: _durationLimits['shortBreak']!['max']!,
                 onChanged: (value) {
-                  if (value >= 1 && value <= 30) {
-                    ref.read(pomodoroProvider.notifier).updateSettings(
-                      settings.copyWith(shortBreakDuration: value),
-                    );
-                  }
+                  setState(() => _shortBreakDuration = value);
+                  _debouncedUpdateSettings(
+                    settings.copyWith(shortBreakDuration: value),
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -81,13 +283,14 @@ class PomodoroSettingsDialog extends ConsumerWidget {
                 theme,
                 icon: Icons.self_improvement_rounded,
                 label: 'Long Break',
-                value: settings.longBreakDuration,
+                value: _longBreakDuration,
+                minValue: _durationLimits['longBreak']!['min']!,
+                maxValue: _durationLimits['longBreak']!['max']!,
                 onChanged: (value) {
-                  if (value >= 1 && value <= 45) {
-                    ref.read(pomodoroProvider.notifier).updateSettings(
-                      settings.copyWith(longBreakDuration: value),
-                    );
-                  }
+                  setState(() => _longBreakDuration = value);
+                  _debouncedUpdateSettings(
+                    settings.copyWith(longBreakDuration: value),
+                  );
                 },
               ),
               
@@ -95,51 +298,47 @@ class PomodoroSettingsDialog extends ConsumerWidget {
               // Behavior Settings Section
               _buildSectionHeader(theme, 'Behavior'),
               const SizedBox(height: 16),
-              _buildSwitchSetting(
+              _buildBehaviorSetting(
                 theme,
                 icon: Icons.volume_up_rounded,
                 label: 'Sound',
-                value: settings.soundEnabled,
+                value: _soundEnabled,
                 onChanged: (value) {
-                  ref.read(pomodoroProvider.notifier).updateSettings(
-                    settings.copyWith(soundEnabled: value),
-                  );
+                  setState(() => _soundEnabled = value);
+                  _updateSettings(settings.copyWith(soundEnabled: value));
                 },
               ),
               const SizedBox(height: 16),
-              _buildSwitchSetting(
+              _buildBehaviorSetting(
                 theme,
                 icon: Icons.vibration_rounded,
                 label: 'Vibration',
-                value: settings.vibrationEnabled,
+                value: _vibrationEnabled,
                 onChanged: (value) {
-                  ref.read(pomodoroProvider.notifier).updateSettings(
-                    settings.copyWith(vibrationEnabled: value),
-                  );
+                  setState(() => _vibrationEnabled = value);
+                  _updateSettings(settings.copyWith(vibrationEnabled: value));
                 },
               ),
               const SizedBox(height: 16),
-              _buildSwitchSetting(
+              _buildBehaviorSetting(
                 theme,
                 icon: Icons.play_circle_outline_rounded,
                 label: 'Auto-start Breaks',
-                value: settings.autoStartBreaks,
+                value: _autoStartBreaks,
                 onChanged: (value) {
-                  ref.read(pomodoroProvider.notifier).updateSettings(
-                    settings.copyWith(autoStartBreaks: value),
-                  );
+                  setState(() => _autoStartBreaks = value);
+                  _updateSettings(settings.copyWith(autoStartBreaks: value));
                 },
               ),
               const SizedBox(height: 16),
-              _buildSwitchSetting(
+              _buildBehaviorSetting(
                 theme,
                 icon: Icons.repeat_rounded,
                 label: 'Auto-start Pomodoros',
-                value: settings.autoStartPomodoros,
+                value: _autoStartPomodoros,
                 onChanged: (value) {
-                  ref.read(pomodoroProvider.notifier).updateSettings(
-                    settings.copyWith(autoStartPomodoros: value),
-                  );
+                  setState(() => _autoStartPomodoros = value);
+                  _updateSettings(settings.copyWith(autoStartPomodoros: value));
                 },
               ),
               
@@ -177,85 +376,6 @@ class PomodoroSettingsDialog extends ConsumerWidget {
         fontSize: 16,
         fontWeight: FontWeight.bold,
       ),
-    );
-  }
-
-  Widget _buildDurationSetting(
-    AppThemeData theme, {
-    required IconData icon,
-    required String label,
-    required int value,
-    required ValueChanged<int> onChanged,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: theme.textSecondary),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                color: theme.textPrimary,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            IconButton(
-              onPressed: () => onChanged(value - 1),
-              icon: Icon(Icons.remove, color: theme.textSecondary),
-            ),
-            Text(
-              '$value min',
-              style: TextStyle(
-                color: theme.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            IconButton(
-              onPressed: () => onChanged(value + 1),
-              icon: Icon(Icons.add, color: theme.textSecondary),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSwitchSetting(
-    AppThemeData theme, {
-    required IconData icon,
-    required String label,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: theme.textSecondary),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                color: theme.textPrimary,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-          activeColor: theme.accent,
-        ),
-      ],
     );
   }
 } 
