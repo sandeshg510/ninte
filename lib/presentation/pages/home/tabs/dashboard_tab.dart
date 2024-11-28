@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ninte/presentation/theme/app_colors.dart';
 import 'package:ninte/presentation/theme/app_theme.dart';
 import 'package:ninte/presentation/theme/app_theme_data.dart';
@@ -11,15 +12,16 @@ import 'package:ninte/presentation/widgets/stats_card.dart';
 import 'package:ninte/presentation/widgets/achievement_card.dart';
 import 'package:ninte/presentation/widgets/progress_chart.dart';
 import 'package:ninte/presentation/widgets/habit_progress_card.dart';
+import 'package:ninte/presentation/widgets/gradient_container.dart';
 
-class DashboardTab extends StatefulWidget {
+class DashboardTab extends ConsumerStatefulWidget {
   const DashboardTab({super.key});
 
   @override
-  State<DashboardTab> createState() => _DashboardTabState();
+  ConsumerState<DashboardTab> createState() => _DashboardTabState();
 }
 
-class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderStateMixin {
+class _DashboardTabState extends ConsumerState<DashboardTab> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late List<Animation<double>> _fadeAnimations;
   late List<Animation<Offset>> _slideAnimations;
@@ -918,5 +920,70 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
   Widget _buildLineChart(AppThemeData theme) {
     // TODO: Implement line chart
     return Container();
+  }
+
+  Widget _buildProgressCard() {
+    return AppColors.withTheme(
+      builder: (context, theme) => GradientContainer(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.accent.withOpacity(0.15),
+                theme.accentLight.withOpacity(0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: theme.surfaceLight.withOpacity(0.1),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Today\'s Progress',
+                style: TextStyle(
+                  color: theme.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              LinearProgressIndicator(
+                value: 0.6,
+                backgroundColor: theme.surfaceLight,
+                valueColor: AlwaysStoppedAnimation<Color>(theme.accent),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '6/10 Tasks',
+                    style: TextStyle(
+                      color: theme.textPrimary,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    '60%',
+                    style: TextStyle(
+                      color: theme.accent,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 } 

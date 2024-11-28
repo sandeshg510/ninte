@@ -48,6 +48,9 @@ class AppThemeData {
   /// Color used for success states and confirmations
   final Color success;
 
+  // Add glassBorder getter
+  Color get glassBorder => textSecondary.withOpacity(0.1);
+
   const AppThemeData({
     required this.name,
     required this.description,

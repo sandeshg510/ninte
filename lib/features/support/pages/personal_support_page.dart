@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ninte/presentation/theme/app_colors.dart';
 
-class HiddenSupportPage extends StatefulWidget {
-  const HiddenSupportPage({super.key});
+class PersonalSupportPage extends StatefulWidget {
+  const PersonalSupportPage({super.key});
 
   @override
-  State<HiddenSupportPage> createState() => _HiddenSupportPageState();
+  State<PersonalSupportPage> createState() => _PersonalSupportPageState();
 }
 
-class _HiddenSupportPageState extends State<HiddenSupportPage> {
+class _PersonalSupportPageState extends State<PersonalSupportPage> {
   final _formKey = GlobalKey<FormState>();
   final _issueController = TextEditingController();
   final _contactController = TextEditingController();
@@ -31,7 +31,7 @@ class _HiddenSupportPageState extends State<HiddenSupportPage> {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               title: Text(
-                'Private Support',
+                'Personal Support',
                 style: TextStyle(color: theme.textPrimary),
               ),
               leading: IconButton(
@@ -110,7 +110,7 @@ class _HiddenSupportPageState extends State<HiddenSupportPage> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text('Submit Anonymously'),
+                                child: const Text('Submit'),
                               ),
                       ),
                     ),
@@ -136,7 +136,6 @@ class _HiddenSupportPageState extends State<HiddenSupportPage> {
 
       if (!mounted) return;
 
-      // Show success feedback
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Thank you for sharing. We\'ll look into this.'),

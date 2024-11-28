@@ -10,6 +10,7 @@ import 'package:ninte/presentation/widgets/glass_container.dart';
 import 'package:ninte/presentation/widgets/animated_nav_bar.dart';
 import 'package:ninte/presentation/pages/settings/settings_page.dart';
 import 'package:ninte/presentation/pages/settings/theme_settings_page.dart';
+import 'package:ninte/features/support/pages/personal_support_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -67,69 +68,84 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Widget _buildDrawer() {
-    return Drawer(
-      backgroundColor: AppColors.surface,
-      child: Column(
-        children: [
-          const SizedBox(height: 48),
-          _buildProfileSection(),
-          const SizedBox(height: 16),
-          Divider(color: AppColors.glassBorder),
-          const SizedBox(height: 8),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildDrawerItem(
-                    icon: Icons.settings_rounded,
-                    title: 'Settings',
-                    subtitle: 'App preferences',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SettingsPage(),
-                        ),
-                      );
-                    },
+    return AppColors.withTheme(
+      builder: (context, theme) => Drawer(
+        backgroundColor: theme.background,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const SizedBox(height: 48),
+            _buildProfileSection(),
+            const SizedBox(height: 16),
+            Divider(color: theme.glassBorder),
+            const SizedBox(height: 8),
+            Column(
+              children: [
+                _buildDrawerItem(
+                  icon: Icons.settings_rounded,
+                  title: 'Settings',
+                  subtitle: 'App preferences',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPage(),
+                      ),
+                    );
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.palette_rounded,
+                  title: 'Theme',
+                  subtitle: 'Customize app appearance',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ThemeSettingsPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildAchievementsSection(),
+                ListTile(
+                  leading: Icon(Icons.support_rounded, color: theme.textPrimary),
+                  title: Text(
+                    'Personal Support',
+                    style: TextStyle(color: theme.textPrimary),
                   ),
-                  _buildDrawerItem(
-                    icon: Icons.palette_rounded,
-                    title: 'Theme',
-                    subtitle: 'Customize app appearance',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ThemeSettingsPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildAchievementsSection(),
-                ],
-              ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => const PersonalSupportPage(),
+                    );
+                  },
+                ),
+              ],
             ),
-          ),
-          Divider(color: AppColors.glassBorder),
-          _buildDrawerItem(
-            icon: Icons.help_outline_rounded,
-            title: 'Help & Support',
-            subtitle: 'FAQ and contact',
-            onTap: () {},
-          ),
-          _buildDrawerItem(
-            icon: Icons.logout_rounded,
-            title: 'Sign Out',
-            subtitle: 'See you soon!',
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed('/auth');
-            },
-            isDestructive: true,
-          ),
-          const SizedBox(height: 24),
-        ],
+            Divider(color: theme.glassBorder),
+            _buildDrawerItem(
+              icon: Icons.help_outline_rounded,
+              title: 'Help & Support',
+              subtitle: 'FAQ and contact',
+              onTap: () {},
+            ),
+            _buildDrawerItem(
+              icon: Icons.logout_rounded,
+              title: 'Sign Out',
+              subtitle: 'See you soon!',
+              onTap: () {
+                Navigator.of(context).pushReplacementNamed('/auth');
+              },
+              isDestructive: true,
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -447,4 +463,4 @@ class CustomTabBarScrollPhysics extends ScrollPhysics {
         stiffness: 100,
         damping: 1,
       );
-} 
+}
