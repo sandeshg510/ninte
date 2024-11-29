@@ -18,6 +18,7 @@ import 'package:ninte/features/habit_tracking/widgets/habit_archive_animation.da
 import 'package:ninte/features/habit_tracking/widgets/habit_completion_celebration.dart';
 import 'package:ninte/features/habit_tracking/widgets/habit_insights_card.dart';
 import 'package:ninte/features/habit_tracking/pages/habit_insights_page.dart';
+import 'package:ninte/features/habit_tracking/pages/habit_detail_page.dart';
 
 class HabitFrequencyTab extends ConsumerStatefulWidget {
   final List<Habit> habits;
@@ -81,120 +82,131 @@ class _HabitFrequencyTabState extends ConsumerState<HabitFrequencyTab> {
               });
             }
           },
-          child: AppCard(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HabitDetailPage(habit: habit),
+                ),
+              );
+            },
+            child: AppCard(
+              margin: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          _getIconForCategory(habit.category),
+                          color: AppColors.accent,
+                        ),
                       ),
-                      child: Icon(
-                        _getIconForCategory(habit.category),
-                        color: AppColors.accent,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            habit.name,
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              habit.name,
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${habit.frequency.name} • ${habit.reminderTime != null ? TimeOfDay.fromDateTime(habit.reminderTime!).format(context) : 'No reminder'}',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isDue)
+                        IconButton(
+                          icon: Icon(
+                            Icons.check_circle_outline_rounded,
+                            color: AppColors.accent,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${habit.frequency.name} • ${habit.reminderTime != null ? TimeOfDay.fromDateTime(habit.reminderTime!).format(context) : 'No reminder'}',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 14,
+                          onPressed: () => _completeHabit(habit.id),
+                        ),
+                      PopupMenuButton(
+                        icon: Icon(
+                          Icons.more_vert_rounded,
+                          color: AppColors.textSecondary,
+                        ),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            child: Text('Edit'),
+                            onTap: () {
+                              // TODO: Show edit modal
+                            },
+                          ),
+                          PopupMenuItem(
+                            child: Text('Archive'),
+                            onTap: () async {
+                              await Future.delayed(const Duration(milliseconds: 200));
+                              if (mounted) {
+                                setState(() {
+                                  _animatingHabits[habit.id] = true;
+                                });
+                                await Future.delayed(const Duration(milliseconds: 500));
+                                if (mounted) {
+                                  await ref.read(habitProvider.notifier).archiveHabit(habit.id);
+                                }
+                              }
+                            },
+                          ),
+                          PopupMenuItem(
+                            child: Text(
+                              'Delete',
+                              style: TextStyle(color: AppColors.error),
                             ),
+                            onTap: () {
+                              ref.read(habitProvider.notifier).deleteHabit(habit.id);
+                            },
                           ),
                         ],
                       ),
-                    ),
-                    PopupMenuButton(
-                      icon: Icon(
-                        Icons.more_vert_rounded,
-                        color: AppColors.textSecondary,
-                      ),
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          child: Text('Edit'),
-                          onTap: () {
-                            // TODO: Show edit modal
-                          },
-                        ),
-                        PopupMenuItem(
-                          child: Text('Archive'),
-                          onTap: () async {
-                            await Future.delayed(const Duration(milliseconds: 200));
-                            if (mounted) {
-                              setState(() {
-                                _animatingHabits[habit.id] = true;
-                              });
-                              await Future.delayed(const Duration(milliseconds: 500));
-                              if (mounted) {
-                                await ref.read(habitProvider.notifier).archiveHabit(habit.id);
-                              }
-                            }
-                          },
-                        ),
-                        PopupMenuItem(
-                          child: Text(
-                            'Delete',
-                            style: TextStyle(color: AppColors.error),
+                    ],
+                  ),
+                  if (stats != null) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Current Streak: ${stats['currentStreak']} days',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
                           ),
-                          onTap: () {
-                            ref.read(habitProvider.notifier).deleteHabit(habit.id);
-                          },
                         ),
                       ],
                     ),
                   ],
-                ),
-                if (stats != null) ...[
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Current Streak: ${stats['currentStreak']} days',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                      if (isDue)
-                        TextButton(
-                          onPressed: () {
-                            _completeHabit(habit.id);
-                          },
-                          child: Text('Complete'),
-                        ),
-                    ],
-                  ),
+                  _buildCompletionStreak(habit),
                 ],
-                const SizedBox(height: 16),
-                _buildCompletionStreak(habit),
-              ],
+              ),
             ),
           ),
         ),
         if (isCompleting)
           Positioned.fill(
-            child: HabitCompletionCelebration(
-              onComplete: () {
+            child: HabitCompletionAnimation(
+              onAnimationComplete: () {
                 if (mounted) {
                   setState(() {
                     _completingHabits.remove(habit.id);
@@ -431,7 +443,14 @@ class _HabitFrequencyTabState extends ConsumerState<HabitFrequencyTab> {
     setState(() {
       _completingHabits[habitId] = true;
     });
+    
+    // Wait for animation to start
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    // Mark habit as complete
     await ref.read(habitProvider.notifier).markHabitComplete(habitId);
+    
+    // Animation will be dismissed via onAnimationComplete callback
   }
 
   bool _isSameWeek(DateTime date1, DateTime date2) {

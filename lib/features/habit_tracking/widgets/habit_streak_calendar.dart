@@ -1,83 +1,99 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ninte/features/habit_tracking/models/habit.dart';
 import 'package:ninte/presentation/theme/app_colors.dart';
-import 'package:intl/intl.dart';
 
-class HabitStreakCalendar extends ConsumerWidget {
+class HabitStreakCalendar extends StatelessWidget {
   final Habit habit;
-  final int daysToShow;
 
   const HabitStreakCalendar({
     super.key,
     required this.habit,
-    this.daysToShow = 30,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final today = DateTime.now();
-    final days = List.generate(daysToShow, (index) {
-      return today.subtract(Duration(days: daysToShow - 1 - index));
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final dates = List.generate(30, (index) {
+      return now.subtract(Duration(days: 29 - index));
     });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Activity Calendar',
+          'Last 30 Days',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 100,
+          height: 120,
           child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
-              mainAxisSpacing: 4,
-              crossAxisSpacing: 4,
+              crossAxisCount: 6,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
               childAspectRatio: 1,
             ),
-            itemCount: days.length,
+            itemCount: 30,
             itemBuilder: (context, index) {
-              final date = days[index];
+              final date = dates[index];
               final isCompleted = habit.completedDates.any((d) =>
-                  d.year == date.year &&
-                  d.month == date.month &&
-                  d.day == date.day);
-              final isToday = date.year == today.year &&
-                  date.month == today.month &&
-                  date.day == today.day;
+                d.year == date.year &&
+                d.month == date.month &&
+                d.day == date.day);
+              final isToday = date.year == now.year &&
+                             date.month == now.month &&
+                             date.day == now.day;
 
-              return Tooltip(
-                message: '${DateFormat('MMM d').format(date)}: ${isCompleted ? 'Completed' : 'Not completed'}',
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? AppColors.accent
-                        : AppColors.surface,
-                    borderRadius: BorderRadius.circular(4),
-                    border: isToday
-                        ? Border.all(color: AppColors.accent, width: 2)
-                        : null,
-                  ),
-                  child: isCompleted
-                      ? Icon(
-                          Icons.check,
-                          color: AppColors.surface,
-                          size: 12,
-                        )
-                      : null,
-                ),
-              );
+              return _buildDateCell(date, isCompleted, isToday);
             },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDateCell(DateTime date, bool isCompleted, bool isToday) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isCompleted 
+            ? AppColors.accent.withOpacity(0.1)
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: isToday
+            ? Border.all(color: AppColors.accent, width: 2)
+            : null,
+      ),
+      child: Stack(
+        children: [
+          if (isCompleted)
+            Center(
+              child: Icon(
+                Icons.check_rounded,
+                color: AppColors.accent,
+                size: 16,
+              ),
+            ),
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: Text(
+              date.day.toString(),
+              style: TextStyle(
+                color: isCompleted 
+                    ? AppColors.accent
+                    : AppColors.textSecondary,
+                fontSize: 10,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 } 
