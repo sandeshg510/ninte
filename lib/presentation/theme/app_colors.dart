@@ -65,6 +65,9 @@ class AppColors extends InheritedWidget {
   /// Success color
   static Color get success => _currentTheme?.success ?? const Color(0xFF4CAF50);
   
+  /// Warning color
+  static Color get warning => const Color(0xFFFFB74D);
+  
   // Utility colors
   /// Border color for glass effect
   static Color get glassBorder => textSecondary.withOpacity(0.1);
