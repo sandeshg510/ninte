@@ -9,7 +9,7 @@ import 'dart:ui';
 import 'dart:math';
 
 class PomodoroNotificationService {
-  static const _channelKey = 'pomodoro_timer';
+  static const String channelKey = 'pomodoro_timer';
   static NotificationActionCallback? _actionCallback;
   static late ThemeCubit _themeCubit;
   static const String _isolateName = 'pomodoro_isolate';
@@ -51,7 +51,7 @@ class PomodoroNotificationService {
         null,
         [
           NotificationChannel(
-            channelKey: _channelKey,
+            channelKey: channelKey,
             channelName: 'Pomodoro Timer',
             channelDescription: 'Shows timer notifications',
             defaultColor: theme.accent,
@@ -165,7 +165,7 @@ class PomodoroNotificationService {
       await AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: 1,
-          channelKey: _channelKey,
+          channelKey: channelKey,
           title: 'Pomodoro Timer Running',
           body: '$sessionType - $timeDisplay remaining',
           category: NotificationCategory.Progress,
@@ -215,7 +215,7 @@ class PomodoroNotificationService {
       await AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: 2,
-          channelKey: _channelKey,
+          channelKey: channelKey,
           title: 'Great Work! 🎉',
           body: '$message\n\nToday: $dailySessions sessions, $dailyMinutes minutes',
           category: NotificationCategory.Alarm,
@@ -285,7 +285,7 @@ class PomodoroNotificationService {
       await AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: 3, // Different ID for streak notifications
-          channelKey: _channelKey,
+          channelKey: channelKey,
           title: 'Streak Milestone! $emoji',
           body: message,
           category: NotificationCategory.Social,

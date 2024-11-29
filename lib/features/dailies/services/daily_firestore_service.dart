@@ -16,9 +16,10 @@ class DailyFirestoreService {
   // Create new daily task
   Future<void> createDaily(DailyTask daily) async {
     try {
-      dev.log('Attempting to create daily task: ${daily.toJson()}');
-      await _dailiesCollection.doc(daily.id).set(daily.toJson());
-      dev.log('Successfully created daily task: ${daily.title}');
+      final data = daily.toJson();
+      dev.log('Creating daily task with data: $data');
+      await _dailiesCollection.doc(daily.id).set(data);
+      dev.log('Successfully created daily task with ID: ${daily.id}');
     } catch (e) {
       dev.log('Error creating daily task: $e');
       throw 'Failed to create daily task: ${e.toString()}';
@@ -28,15 +29,19 @@ class DailyFirestoreService {
   // Get all daily tasks
   Stream<List<DailyTask>> getDailies() {
     try {
-      return _dailiesCollection
+      dev.log('Starting to fetch dailies stream');
+      final stream = _dailiesCollection
           .orderBy('dueTime')
           .snapshots()
           .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          return DailyTask.fromJson({...data, 'id': doc.id});
-        }).toList();
-      });
+            dev.log('Received Firestore snapshot with ${snapshot.docs.length} documents');
+            return snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              dev.log('Processing document: ${doc.id} with data: $data');
+              return DailyTask.fromJson({...data, 'id': doc.id});
+            }).toList();
+          });
+      return stream;
     } catch (e) {
       dev.log('Error getting daily tasks: $e');
       throw 'Failed to get daily tasks: ${e.toString()}';

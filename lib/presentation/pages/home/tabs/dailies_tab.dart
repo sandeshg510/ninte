@@ -305,6 +305,8 @@ class _DailiesTabState extends ConsumerState<DailiesTab> {
         return Icons.sort_by_alpha_rounded;
       case DailySortOption.category:
         return Icons.category_rounded;
+      case DailySortOption.completion:
+        return Icons.check_circle_outline_rounded;
       default:
         return Icons.sort_rounded;
     }
@@ -320,6 +322,8 @@ class _DailiesTabState extends ConsumerState<DailiesTab> {
         return 'Sort Alphabetically';
       case DailySortOption.category:
         return 'Sort by Category';
+      case DailySortOption.completion:
+        return 'Sort by Completion';
       default:
         return 'Sort';
     }

@@ -4,6 +4,7 @@ import 'dart:developer' as dev;
 import '../services/daily_firestore_service.dart';
 import '../models/daily_task.dart';
 import 'daily_state.dart';
+import '../services/daily_notification_service.dart';
 
 class DailyNotifier extends StateNotifier<DailyState> {
   final DailyFirestoreService _firestoreService;
@@ -22,7 +23,8 @@ class DailyNotifier extends StateNotifier<DailyState> {
       // Listen to dailies stream
       _dailiesSubscription = _firestoreService.getDailies().listen(
         (dailies) {
-          dev.log('Received ${dailies.length} daily tasks from Firestore');
+          dev.log('Received ${dailies.length} daily tasks from stream');
+          dev.log('Tasks: ${dailies.map((d) => d.title).join(', ')}');
           state = state.copyWith(
             dailyTasks: dailies,
             isLoading: false,
@@ -49,9 +51,12 @@ class DailyNotifier extends StateNotifier<DailyState> {
 
   Future<void> createDaily(DailyTask daily) async {
     try {
-      dev.log('Creating new daily task...');
+      dev.log('Creating new daily task: ${daily.title}');
       await _firestoreService.createDaily(daily);
       dev.log('Daily task created successfully');
+      if (daily.hasReminder) {
+        await DailyNotificationService.scheduleReminder(daily);
+      }
     } catch (e) {
       dev.log('Error creating daily task: $e');
       state = state.copyWith(error: e.toString());
@@ -61,6 +66,10 @@ class DailyNotifier extends StateNotifier<DailyState> {
   Future<void> updateDaily(DailyTask daily) async {
     try {
       await _firestoreService.updateDaily(daily);
+      await DailyNotificationService.cancelReminder(daily.id);
+      if (daily.hasReminder) {
+        await DailyNotificationService.scheduleReminder(daily);
+      }
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
@@ -69,6 +78,7 @@ class DailyNotifier extends StateNotifier<DailyState> {
   Future<void> deleteDaily(String dailyId) async {
     try {
       await _firestoreService.deleteDaily(dailyId);
+      await DailyNotificationService.cancelReminder(dailyId);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }

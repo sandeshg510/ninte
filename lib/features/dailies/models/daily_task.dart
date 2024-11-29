@@ -25,6 +25,8 @@ class DailyTask {
   final DailyPriority priority;
   final DailyCategory category;
   final bool isCompleted;
+  final bool hasReminder;
+  final int reminderMinutes;
   final DateTime createdAt;
   final List<DateTime> completionHistory;
   final int currentStreak;
@@ -39,6 +41,8 @@ class DailyTask {
     this.priority = DailyPriority.medium,
     this.category = DailyCategory.personal,
     this.isCompleted = false,
+    this.hasReminder = false,
+    this.reminderMinutes = 15,
     DateTime? createdAt,
     this.completionHistory = const [],
     this.currentStreak = 0,
@@ -48,25 +52,30 @@ class DailyTask {
        createdAt = createdAt ?? DateTime.now();
 
   DailyTask copyWith({
+    String? id,
     String? title,
     String? description,
     DateTime? dueTime,
     DailyPriority? priority,
     DailyCategory? category,
     bool? isCompleted,
+    bool? hasReminder,
+    int? reminderMinutes,
     List<DateTime>? completionHistory,
     int? currentStreak,
     int? bestStreak,
     Map<String, dynamic>? customData,
   }) {
     return DailyTask(
-      id: id,
+      id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
       dueTime: dueTime ?? this.dueTime,
       priority: priority ?? this.priority,
       category: category ?? this.category,
       isCompleted: isCompleted ?? this.isCompleted,
+      hasReminder: hasReminder ?? this.hasReminder,
+      reminderMinutes: reminderMinutes ?? this.reminderMinutes,
       createdAt: createdAt,
       completionHistory: completionHistory ?? this.completionHistory,
       currentStreak: currentStreak ?? this.currentStreak,
@@ -81,9 +90,11 @@ class DailyTask {
       'title': title,
       'description': description,
       'dueTime': dueTime.toIso8601String(),
-      'priority': priority.name,
-      'category': category.name,
+      'priority': priority.index,
+      'category': category.index,
       'isCompleted': isCompleted,
+      'hasReminder': hasReminder,
+      'reminderMinutes': reminderMinutes,
       'createdAt': createdAt.toIso8601String(),
       'completionHistory': completionHistory.map((d) => d.toIso8601String()).toList(),
       'currentStreak': currentStreak,
@@ -93,21 +104,51 @@ class DailyTask {
   }
 
   factory DailyTask.fromJson(Map<String, dynamic> json) {
+    // Helper function to parse priority
+    DailyPriority _parsePriority(dynamic value) {
+      if (value is int) {
+        return DailyPriority.values[value];
+      } else if (value is String) {
+        return DailyPriority.values.firstWhere(
+          (e) => e.toString().split('.').last == value,
+          orElse: () => DailyPriority.medium,
+        );
+      }
+      return DailyPriority.medium;
+    }
+
+    // Helper function to parse category
+    DailyCategory _parseCategory(dynamic value) {
+      if (value is int) {
+        return DailyCategory.values[value];
+      } else if (value is String) {
+        return DailyCategory.values.firstWhere(
+          (e) => e.toString().split('.').last == value,
+          orElse: () => DailyCategory.personal,
+        );
+      }
+      return DailyCategory.personal;
+    }
+
     return DailyTask(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      dueTime: DateTime.parse(json['dueTime']),
-      priority: DailyPriority.values.byName(json['priority']),
-      category: DailyCategory.values.byName(json['category']),
-      isCompleted: json['isCompleted'],
-      createdAt: DateTime.parse(json['createdAt']),
-      completionHistory: (json['completionHistory'] as List)
-          .map((d) => DateTime.parse(d))
-          .toList(),
-      currentStreak: json['currentStreak'],
-      bestStreak: json['bestStreak'],
-      customData: json['customData'],
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String? ?? '',
+      dueTime: DateTime.parse(json['dueTime'] as String),
+      priority: _parsePriority(json['priority']),
+      category: _parseCategory(json['category']),
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      hasReminder: json['hasReminder'] as bool? ?? false,
+      reminderMinutes: json['reminderMinutes'] as int? ?? 15,
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      completionHistory: (json['completionHistory'] as List<dynamic>?)
+          ?.map((d) => DateTime.parse(d as String))
+          .toList() ?? [],
+      currentStreak: (json['currentStreak'] as num?)?.toInt() ?? 0,
+      bestStreak: (json['bestStreak'] as num?)?.toInt() ?? 0,
+      customData: json['customData'] as Map<String, dynamic>?,
     );
   }
 

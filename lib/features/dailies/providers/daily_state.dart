@@ -4,7 +4,8 @@ enum DailySortOption {
   dueTime,
   priority,
   alphabetical,
-  category
+  category,
+  completion
 }
 
 class DailyState {
@@ -57,18 +58,46 @@ class DailyState {
 
   List<DailyTask> getSortedTasks(DailySortOption sortOption) {
     final tasks = List<DailyTask>.from(dailyTasks);
+    
+    tasks.sort((a, b) {
+      if (a.isCompleted == b.isCompleted) return 0;
+      return a.isCompleted ? 1 : -1;
+    });
+
     switch (sortOption) {
       case DailySortOption.dueTime:
-        tasks.sort((a, b) => a.dueTime.compareTo(b.dueTime));
+        tasks.sort((a, b) {
+          if (a.isCompleted != b.isCompleted) {
+            return a.isCompleted ? 1 : -1;
+          }
+          return a.dueTime.compareTo(b.dueTime);
+        });
         break;
       case DailySortOption.priority:
-        tasks.sort((a, b) => b.priority.index.compareTo(a.priority.index));
+        tasks.sort((a, b) {
+          if (a.isCompleted != b.isCompleted) {
+            return a.isCompleted ? 1 : -1;
+          }
+          return b.priority.index.compareTo(a.priority.index);
+        });
         break;
       case DailySortOption.alphabetical:
-        tasks.sort((a, b) => a.title.compareTo(b.title));
+        tasks.sort((a, b) {
+          if (a.isCompleted != b.isCompleted) {
+            return a.isCompleted ? 1 : -1;
+          }
+          return a.title.compareTo(b.title);
+        });
         break;
       case DailySortOption.category:
-        tasks.sort((a, b) => a.category.name.compareTo(b.category.name));
+        tasks.sort((a, b) {
+          if (a.isCompleted != b.isCompleted) {
+            return a.isCompleted ? 1 : -1;
+          }
+          return a.category.name.compareTo(b.category.name);
+        });
+        break;
+      case DailySortOption.completion:
         break;
     }
     return tasks;

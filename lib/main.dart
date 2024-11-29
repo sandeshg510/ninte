@@ -13,23 +13,32 @@ import 'package:ninte/core/app.dart';
 import 'package:ninte/core/services/auth_service.dart';
 import 'package:ninte/features/pomodoro/services/notification_service.dart';
 import 'dart:developer' as dev;
+import 'features/dailies/services/daily_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Add lifecycle observer
-  WidgetsBinding.instance.addObserver(AppLifecycleObserver());
-  
+
+  // Initialize Firebase first
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   final prefs = await SharedPreferences.getInstance();
   final themeCubit = ThemeCubit(prefs);
   
-  // Set theme cubit for notifications
+  // Set theme cubit for Pomodoro notifications
   PomodoroNotificationService.setThemeCubit(themeCubit);
   
-  // Initialize notifications with proper error handling
+  // Initialize both notification services
   try {
+    // Initialize Pomodoro notifications
     await PomodoroNotificationService.init();
-    final hasPermission = await PomodoroNotificationService.requestPermissions();
+    
+    // Initialize Daily notifications
+    await DailyNotificationService.initialize();
+    
+    // Request permissions (will work for both services since they use the same plugin)
+    final hasPermission = await DailyNotificationService.requestPermissions();
     if (!hasPermission) {
       dev.log('Notification permissions not granted');
     }
@@ -37,9 +46,8 @@ void main() async {
     dev.log('Error initializing notifications: $e');
   }
   
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Add lifecycle observer for Pomodoro background state
+  WidgetsBinding.instance.addObserver(AppLifecycleObserver());
   
   final authService = AuthService();
   
@@ -61,7 +69,7 @@ void main() async {
   );
 }
 
-// Add this class to handle app lifecycle
+// Keep the AppLifecycleObserver for Pomodoro
 class AppLifecycleObserver with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -79,7 +87,6 @@ class AppLifecycleObserver with WidgetsBindingObserver {
     }
   }
 
-  // Add dispose method
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
   }
