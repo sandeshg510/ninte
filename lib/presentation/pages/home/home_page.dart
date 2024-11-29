@@ -437,19 +437,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Widget _buildFloatingActionButton() {
     return AnimatedScale(
       duration: const Duration(milliseconds: 200),
-      scale: (_currentIndex == 1 || _currentIndex == 2) ? 1.0 : 0.0,
+      scale: _currentIndex == 2 ? 1.0 : 0.0,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
-        opacity: (_currentIndex == 1 || _currentIndex == 2) ? 1.0 : 0.0,
+        opacity: _currentIndex == 2 ? 1.0 : 0.0,
         child: FloatingActionButton(
           onPressed: () {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              builder: (context) => _currentIndex == 1
-                  ? const CreateDailyModal()
-                  : const CreateHabitModal(),
+              builder: (context) => const CreateHabitModal(),
             );
           },
           backgroundColor: AppColors.accent,
