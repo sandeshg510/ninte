@@ -21,7 +21,7 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
 
   PomodoroNotifier(this._soundService) : super(PomodoroState.initial()) {
     _initializeState();
-    PomodoroNotificationService.init();
+    _setupNotificationActions();
   }
 
   Future<void> _initializeState() async {
@@ -158,7 +158,7 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
   void dispose() {
     _timer?.cancel();
     _syncTimer?.cancel(); // Clean up sync timer
-    PomodoroNotificationService.cancelAll();
+    PomodoroNotificationService.cancelAllNotifications();
     super.dispose();
   }
 
@@ -244,6 +244,9 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
         // Log milestone
         if (newStreak > 0 && newStreak % 7 == 0) {
           dev.log('🎉 Achieved ${newStreak}-day streak!');
+          PomodoroNotificationService.showStreakNotification(
+            streakDays: newStreak,
+          );
         }
       }
     } else {
@@ -261,6 +264,17 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
       if (state.remainingSeconds <= 3) {
         _soundService.playTick();
       }
+      
+      // Update notification with seconds for more precision
+      PomodoroNotificationService.showTimerRunningNotification(
+        remainingSeconds: state.remainingSeconds,
+        sessionType: state.type == TimerType.work 
+            ? 'Work Session' 
+            : state.type == TimerType.shortBreak 
+                ? 'Short Break' 
+                : 'Long Break',
+        totalSeconds: _getSessionDuration(),
+      );
       
       // Update elapsed time
       if (state.type == TimerType.work) {
@@ -290,16 +304,28 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
           remainingSeconds: state.remainingSeconds - 1,
         );
       }
+
+      // Update notification every minute
+      if (state.remainingSeconds % 60 == 0) {
+        PomodoroNotificationService.showTimerRunningNotification(
+          remainingSeconds: state.remainingSeconds,
+          sessionType: state.type == TimerType.work 
+              ? 'Work Session' 
+              : state.type == TimerType.shortBreak 
+                  ? 'Short Break' 
+                  : 'Long Break',
+          totalSeconds: _getSessionDuration(),
+        );
+      }
     } else {
       _timer?.cancel();
       _soundService.playTimerComplete();
       _elapsedSeconds = 0;
       
       if (state.type == TimerType.work) {
-        // Calculate total elapsed minutes for this session
+        // Work session completion
         final elapsedMinutes = state.settings.workDuration;
         
-        // Only count if minimum duration met
         if (elapsedMinutes >= _minimumSessionMinutes) {
           final newState = state.copyWith(
             status: TimerStatus.finished,
@@ -310,6 +336,14 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
           );
           state = newState;
           _saveToFirebase(newState);
+          
+          // Show motivational completion notification
+          PomodoroNotificationService.showTimerCompleteNotification(
+            sessionType: 'Work',
+            isWorkSession: true,
+            dailySessions: state.dailySessions,
+            dailyMinutes: state.dailyMinutes,
+          );
           
           // Handle auto-start break
           if (state.settings.autoStartBreaks) {
@@ -324,26 +358,24 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
           }
         }
       } else {
-        // Break session completed
+        // Break session completed - Force work start
         state = state.copyWith(
           status: TimerStatus.finished,
         );
         
-        // Handle auto-start work session
-        if (state.settings.autoStartPomodoros) {
-          dev.log('Auto-starting next work session');
-          Future.delayed(const Duration(seconds: 1), () {
-            setTimerType(TimerType.work);
-            startTimer();
-          });
-        }
-      }
-      
-      // Show appropriate notification
-      if (state.type == TimerType.work) {
-        PomodoroNotificationService.showWorkCompleteNotification();
-      } else {
-        PomodoroNotificationService.showBreakCompleteNotification();
+        PomodoroNotificationService.showTimerCompleteNotification(
+          sessionType: state.type == TimerType.shortBreak ? 'Short Break' : 'Long Break',
+          isWorkSession: false,
+          dailySessions: state.dailySessions,
+          dailyMinutes: state.dailyMinutes,
+        );
+        
+        // Always auto-start work after break
+        dev.log('Auto-starting work session after break');
+        Future.delayed(const Duration(seconds: 1), () {
+          setTimerType(TimerType.work);
+          startTimer();
+        });
       }
     }
   }
@@ -391,7 +423,12 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
           metThreshold: true,
         );
         
-        PomodoroNotificationService.showWorkCompleteNotification();
+        PomodoroNotificationService.showTimerCompleteNotification(
+          sessionType: 'Work',
+          isWorkSession: true,
+          dailySessions: state.dailySessions,
+          dailyMinutes: state.dailyMinutes,
+        );
       } else {
         _logSessionAnalytics(
           duration: elapsedMinutes,
@@ -412,6 +449,7 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
     }
     
     _soundService.playTimerComplete();
+    PomodoroNotificationService.cancelTimerNotification();
   }
 
   // Add auto-break feature
@@ -457,12 +495,26 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
     );
     
     state = state.copyWith(status: TimerStatus.running);
+    
+    // Show initial notification with seconds
+    PomodoroNotificationService.showTimerRunningNotification(
+      remainingSeconds: state.remainingSeconds,
+      sessionType: state.type == TimerType.work 
+          ? 'Work Session' 
+          : state.type == TimerType.shortBreak 
+              ? 'Short Break' 
+              : 'Long Break',
+      totalSeconds: _getSessionDuration(),
+    );
   }
 
   void pauseTimer() {
     _timer?.cancel();
     state = state.copyWith(status: TimerStatus.paused);
     _soundService.playTick();
+    
+    // Cancel the ongoing notification
+    PomodoroNotificationService.cancelTimerNotification();
     
     // Save progress when paused
     if (state.type == TimerType.work) {
@@ -474,6 +526,9 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
     _timer?.cancel();
     _elapsedSeconds = 0;
     _soundService.playReset();
+    
+    // Cancel notifications
+    PomodoroNotificationService.cancelTimerNotification();
     
     state = state.copyWith(
       status: TimerStatus.initial,
@@ -592,6 +647,28 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
       Auto-start Breaks: ${state.settings.autoStartBreaks}
       Auto-start Pomodoros: ${state.settings.autoStartPomodoros}
     ''');
+  }
+
+  void _setupNotificationActions() {
+    PomodoroNotificationService.setActionCallback((actionId) {
+      switch (actionId) {
+        case 'pause':
+          pauseTimer();
+          break;
+        case 'stop':
+          resetTimer();
+          break;
+        case 'start_break':
+          final shouldTakeLongBreak = state.dailySessions % state.settings.sessionsBeforeLongBreak == 0;
+          setTimerType(shouldTakeLongBreak ? TimerType.longBreak : TimerType.shortBreak);
+          startTimer();
+          break;
+        case 'start_work':
+          setTimerType(TimerType.work);
+          startTimer();
+          break;
+      }
+    });
   }
 }
 

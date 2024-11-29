@@ -28,6 +28,7 @@ dependencies:
   flutter_svg: ^2.0.9
   google_sign_in: ^6.1.6
   just_audio: ^0.9.36
+  awesome_notifications: ^0.8.2
 
 dev_dependencies:
   flutter_test:

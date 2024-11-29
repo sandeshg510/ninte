@@ -16,6 +16,6 @@ final pomodoroFirestoreProvider = Provider<PomodoroFirestoreService>((ref) {
 
 final notificationServiceProvider = Provider<PomodoroNotificationService>((ref) {
   PomodoroNotificationService.init();
-  ref.onDispose(() => PomodoroNotificationService.cancelAll());
+  ref.onDispose(() => PomodoroNotificationService.cleanup());
   return PomodoroNotificationService();
 }); 
