@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ninte/presentation/theme/app_theme.dart';
 
+import '../../core/providers/shared_preferences_provider.dart';
+
 final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeType>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return ThemeNotifier(prefs);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ninte/presentation/theme/app_colors.dart';
 import 'package:ninte/presentation/theme/app_theme.dart';
 
 /// Helper class to create styles without const

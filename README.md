@@ -3,7 +3,8 @@
 <p align="center">
   <!-- Add app logo here -->
   <h3 align="center">Transform Your Daily Habits with Style</h3>
-</p>
+
+[//]: # (</p>)
 
 ## About Ninte
 

@@ -133,6 +133,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 16),
                   CustomTextField(
                     controller: _passwordController,
+                    // maxLines: 2,
                     label: 'Password',
                     obscureText: true,
                     prefixIcon: Icon(

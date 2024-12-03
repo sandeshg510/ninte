@@ -129,6 +129,12 @@ class ThemePreviewCard extends StatelessWidget {
         return 'Ocean Blue';
       case ThemeType.lavender:
         return 'Lavender Purple';
-    }
+      case ThemeType.darkMinimal:
+        return 'Eclipse Dark';      case ThemeType.darkOcean:
+      return 'Eclipse Dark';      case ThemeType.darkSunset:
+      return 'Eclipse Dark';      case ThemeType.lightMinimal:
+      return 'Eclipse Dark';      case ThemeType.lightNature:
+      return 'Eclipse Dark';      case ThemeType.lightOcean:
+      return 'Eclipse Dark';    }
   }
 } 

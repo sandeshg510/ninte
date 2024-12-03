@@ -88,7 +88,7 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
         validator: validator,
-        maxLines: maxLines,
+        // maxLines: maxLines,
       ),
     );
   }

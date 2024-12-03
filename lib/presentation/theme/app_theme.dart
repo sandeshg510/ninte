@@ -9,7 +9,7 @@ enum ThemeType {
   darkSunset,    // Warm sunset dark theme
   lightMinimal,  // Clean light theme
   lightNature,   // Nature-inspired light theme
-  lightOcean,    // Ocean-inspired light theme
+  lightOcean, midnight, eclipse, aurora, sunset, ocean, lavender,    // Ocean-inspired light theme
 }
 
 /// Central theme configuration class
